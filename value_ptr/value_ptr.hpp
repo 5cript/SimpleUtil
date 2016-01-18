@@ -160,7 +160,7 @@ namespace sutil
         value_ptr(value_ptr&& v) noexcept
         {
             reset();
-            m_ = std::move(v);
+            m_ = std::move(v.m_);
         }
 
         /**
@@ -168,10 +168,8 @@ namespace sutil
          *  The value_ptr remains unaltered if clone throws.
          */
         value_ptr(value_ptr const& v)
+            : m_(clone(v.get()), v.get_cloner(), v.get_deleter())
         {
-            reset(v.clone());
-            get_deleter() = v.get_deleter();
-            get_cloner() = v.get_cloner();
         }
 
         /**
@@ -180,10 +178,8 @@ namespace sutil
          */
         template <typename U, typename ClonerU, typename DeleterU>
         value_ptr(value_ptr <U, ClonerU, DeleterU> const& v)
+            : m_(clone(v.get()), v.get_cloner(), v.get_deleter())
         {
-            reset(v.clone());
-            get_deleter() = v.get_deleter();
-            get_cloner() = v.get_cloner();
         }
 
         /**
@@ -214,7 +210,7 @@ namespace sutil
          */
         value_ptr& operator=(value_ptr const& v)
         {
-            reset(v.clone());
+            reset(clone(v.get()));
             get_deleter() = v.get_deleter();
             get_cloner() = v.get_cloner();
             return *this;
@@ -226,7 +222,7 @@ namespace sutil
         template <typename U, typename ClonerU, typename DeleterU>
         value_ptr& operator=(value_ptr <U, ClonerU, DeleterU> const& v)
         {
-            reset(v.clone());
+            reset(clone(v.get()));
             get_deleter() = v.get_deleter();
             get_cloner() = v.get_cloner();
             return *this;
@@ -291,17 +287,6 @@ namespace sutil
         }
 
         /**
-         *  Clones the pointee and returns the clone.
-         */
-        pointer clone() const
-        {
-            if (operator bool()) {
-                return get_cloner()(get());
-            } else
-                return nullptr;
-        }
-
-        /**
          *  Resets the value_ptr with a new object. calls the deleter on the old object.
          */
         void reset(pointer p = pointer())
@@ -348,12 +333,23 @@ namespace sutil
         {
             reset();
         }
+
+    private:
+        template <typename PtrT>
+        pointer clone(PtrT p) {
+            return p ? get_cloner()(p) : nullptr;
+        }
+
     private:
         std::tuple <T*, ClonerT, DeleterT> m_;
-        //T* ptr_;
-        //ClonerT cloner_;
-        //DeleterT deleter_;
     };
+
+    template <typename T, typename ClonerT = sutil::default_clone <T>, typename DeleterT = std::default_delete <T>, typename... List>
+    value_ptr <T, ClonerT, DeleterT> make_value(List&&... list)
+    {
+        return value_ptr <T, ClonerT, DeleterT> (new T(std::forward <List> (list)...));
+    }
+
 }
 
 #endif // SIMPLE_UTIL_VALUE_PTR_HPP_INCLUDED
