@@ -159,8 +159,9 @@ namespace sutil
          */
         value_ptr(value_ptr&& v) noexcept
         {
-            reset();
-            m_ = std::move(v.m_);
+            reset(v.release());
+            get_deleter() = std::move(v.get_deleter());
+            get_cloner() = std::move(v.get_cloner());
         }
 
         /**
