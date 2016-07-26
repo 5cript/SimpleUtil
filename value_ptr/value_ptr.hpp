@@ -230,6 +230,16 @@ namespace sutil
         }
 
         /**
+         *  Replacing assignment, frees previously held object.
+         *  Alternative to reset(ptr).
+         */
+        value_ptr& operator=(T* ptr)
+        {
+            reset(ptr);
+            return *this;
+        }
+
+        /**
          *  Convenient dereferencing operator.
          */
         typename std::add_lvalue_reference <element_type>::type operator*() const
