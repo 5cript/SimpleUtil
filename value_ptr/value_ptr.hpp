@@ -26,7 +26,7 @@ namespace sutil
         /**
          *  Creates an invalid value_ptr that has ownership of nothing.
          */
-        constexpr value_ptr() noexcept
+        explicit constexpr value_ptr() noexcept
             : m_(nullptr, cloner_type(), deleter_type())
         {
             static_assert(!std::is_pointer<deleter_type>::value,
@@ -39,7 +39,7 @@ namespace sutil
         /**
          *  Creates an invalid value_ptr that has ownership of nothing.
          */
-        constexpr value_ptr(std::nullptr_t) noexcept
+        explicit constexpr value_ptr(std::nullptr_t) noexcept
             : m_(nullptr, cloner_type(), deleter_type())
         {
             static_assert(!std::is_pointer<deleter_type>::value,
@@ -149,7 +149,7 @@ namespace sutil
          *  @param d A deleter.
          */
         value_ptr(T* ptr,
-                  typename std::remove_reference <cloner_type>::type&& d,
+                  typename std::remove_reference <deleter_type>::type&& d,
                   typename std::remove_reference <cloner_type>::type&& c) noexcept
             : m_(std::move(ptr), std::move(c), std::move(d))
         {

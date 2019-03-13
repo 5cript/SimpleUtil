@@ -1,8 +1,9 @@
 main.cpp
-SimpleUtil.cbp
-SimpleUtil_build_log.html
+*.cbp
+*_build_log.html
 bin/*
 obj/*
-SimpleUtil.depend
-SimpleUtil.layout
+*.depend
+*.layout
 *.astcache
+build.sh
